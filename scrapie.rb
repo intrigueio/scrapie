@@ -112,5 +112,3 @@ archive = PastebinArchiver.new
 
 posts = scraper.scrape(250)
 archive.store(posts)
-
-puts "[+] Holding #{archive.all.count} pastes!"
