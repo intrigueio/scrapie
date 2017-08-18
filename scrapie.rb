@@ -16,6 +16,7 @@ class PastebinArchiver
 
     # then open the file
     existing_pastes = _get_all_pastes
+    overlapping_paste_count = 0
 
     begin
       # then iterate through the new pastes and
@@ -24,6 +25,7 @@ class PastebinArchiver
       new_pastes.each do |np|
         existing_pastes.each do |ep|
           if ep["key"] == np["key"]
+            overlapping_paste_count += 1
             already_exists = true
           end
         end
@@ -31,6 +33,9 @@ class PastebinArchiver
         unless already_exists
           existing_pastes << np
         end
+
+        puts "#{overlapping_paste_count} overlapping pastes in this run."
+
       end
 
       # then update the file!
@@ -79,7 +84,7 @@ class PastebinScraper
       begin
         response = HTTParty.get new_pastes_endpoint
         posts = JSON.parse(response.body)
-        puts "[+] Go #{posts.count} pastes"
+        puts "[+] Got #{posts.count} pastes"
 
         posts.each do |p|
           #puts p["scrape_url"]
@@ -110,5 +115,9 @@ end
 scraper = PastebinScraper.new
 archive = PastebinArchiver.new
 
-posts = scraper.scrape(250)
-archive.store(posts)
+
+while true do
+  posts = scraper.scrape(250)
+  archive.store(posts)
+  sleep 200
+end
