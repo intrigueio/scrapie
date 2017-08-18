@@ -51,10 +51,13 @@ class PastebinArchiver
       begin
         pastes = JSON.parse(File.open(@filename,"r").read)
       rescue Errno::ENOENT => e # file didn't exist
+        puts "[-] Error: #{e}"
         return []
       rescue JSON::ParserError => e
+        puts "[-] Error: #{e}"
         return []
       rescue StandardError => e
+        puts "[-] Error: #{e}"
         return []
       end
     pastes
