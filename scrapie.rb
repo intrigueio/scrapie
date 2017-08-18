@@ -82,7 +82,7 @@ class PastebinScraper
         puts "[+] Go #{posts.count} pastes"
 
         posts.each do |p|
-          puts p["scrape_url"]
+          #puts p["scrape_url"]
           paste_response = HTTParty.get(p["scrape_url"])
           paste = paste_response.body
           p["text"] = _encode_string(paste)
