@@ -33,10 +33,11 @@ class PastebinArchiver
         unless already_exists
           existing_pastes << np
         end
-
-        puts "#{overlapping_paste_count} overlapping pastes in this run."
-
+        
       end
+
+      puts "#{overlapping_paste_count} overlapping pastes in this run."
+
 
       # then update the file!
       File.open(@filename,"a").write(existing_pastes.to_json)
@@ -87,7 +88,6 @@ class PastebinScraper
         puts "[+] Got #{posts.count} pastes"
 
         posts.each do |p|
-          #puts p["scrape_url"]
           paste_response = HTTParty.get(p["scrape_url"])
           paste = paste_response.body
           p["text"] = _encode_string(paste)
