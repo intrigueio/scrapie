@@ -53,7 +53,7 @@ class PastebinArchiver
       puts "[+] #{overlapping_paste_count} overlapping pastes in this run."
 
       # Then update the file!
-      File.open("#{@current_index_file_path}","w").write(existing_pastes.to_json)
+      File.open("#{@current_index_file_path}","w+").write(existing_pastes.to_json)
     rescue NoMethodError => e
       puts "[-] Error with the response... rate limiting? #{e}"
     end
