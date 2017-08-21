@@ -9,10 +9,19 @@ class PastebinArchiver
 
   def initialize
     date = Time.now.strftime("%Y%m%d")
-    @filename = "./data/#{date}.json"
+    @data_path = "./data"
+    @file_base = "#{@data_path}/#{date}"
+
+    # these two are used to store the index and data
+    @current_index_file_path = "#{@file_base}.json"
+    @current_data_directory = "#{@file_base}"
+
+    # make a directory if it doesn't already exist
+    Dir.mkdir "#{@current_data_directory}" unless File.exists?(@current_data_directory)
+
   end
 
-  def store(new_pastes)
+  def fetch_and_store(new_pastes)
 
     # then open the file
     existing_pastes = _get_all_pastes
@@ -23,6 +32,7 @@ class PastebinArchiver
       # add them together
       already_exists = false
       new_pastes.each do |np|
+        #puts "Checking new paste: #{np["key"]}"
         existing_pastes.each do |ep|
           if ep["key"] == np["key"]
             overlapping_paste_count += 1
@@ -31,16 +41,19 @@ class PastebinArchiver
         end
 
         unless already_exists
+          store_location = "#{@current_data_directory}/#{np["key"]}.txt"
+          File.open(store_location,"w").write(np["text"])
+          np.delete("text")
+          np["file"] = store_location
           existing_pastes << np
         end
-        
+
       end
 
-      puts "#{overlapping_paste_count} overlapping pastes in this run."
+      puts "[+] #{overlapping_paste_count} overlapping pastes in this run."
 
-
-      # then update the file!
-      File.open(@filename,"a").write(existing_pastes.to_json)
+      # Then update the file!
+      File.open("#{@current_index_file_path}","w").write(existing_pastes.to_json)
     rescue NoMethodError => e
       puts "[-] Error with the response... rate limiting? #{e}"
     end
@@ -55,7 +68,7 @@ class PastebinArchiver
 
     def _get_all_pastes
       begin
-        pastes = JSON.parse(File.open(@filename,"r").read)
+        pastes = JSON.parse(File.open("#{@current_index_file_path}","r").read)
       rescue Errno::ENOENT => e # file didn't exist
         puts "[-] Error: #{e}"
         return []
@@ -77,7 +90,7 @@ class PastebinScraper
     # Returns an array of posts from the pastebin API
     #
     # @return [Array] an array of paste data
-    def scrape(limit=200)
+    def scrape(limit=250)
 
       # Endpoint for latest posts
       new_pastes_endpoint = "https://pastebin.com/api_scraping.php?limit=#{limit}"
@@ -117,7 +130,7 @@ archive = PastebinArchiver.new
 
 
 while true do
-  posts = scraper.scrape(250)
-  archive.store(posts)
-  sleep 200
+  posts = scraper.scrape(100)
+  archive.fetch_and_store(posts)
+  sleep 60
 end
