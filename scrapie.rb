@@ -125,11 +125,10 @@ class PastebinScraper
 
 end
 
-scraper = PastebinScraper.new
-archive = PastebinArchiver.new
-
 
 while true do
+  scraper = PastebinScraper.new
+  archive = PastebinArchiver.new
   posts = scraper.scrape(100)
   archive.fetch_and_store(posts)
   sleep 60
