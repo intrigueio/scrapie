@@ -22,12 +22,13 @@ class PastebinArchiver
   end
 
   def fetch_and_store(new_pastes)
+    return unless new_pastes
 
     # then open the file
     existing_pastes = _get_all_pastes
     overlapping_paste_count = 0
-
     begin
+
       # then iterate through the new pastes and
       # add them together
       already_exists = false
@@ -127,9 +128,17 @@ end
 
 
 while true do
+
   scraper = PastebinScraper.new
   archive = PastebinArchiver.new
   posts = scraper.scrape(100)
-  archive.fetch_and_store(posts)
+
+  if posts
+    puts "[+] Fetching and storing..."
+    archive.fetch_and_store(posts)
+  else
+    puts "[-] Unable to fetch and store, posts is empty"
+  end
+
   sleep 60
 end
